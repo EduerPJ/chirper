@@ -1,0 +1,43 @@
+#!/bin/sh
+export FORCE_COLOR=1
+
+# Obtener los archivos modificados
+STAGED_FILES=$(git diff --cached --name-only --diff-filter=d)
+
+# Verificar si hay archivos en directorios relevantes
+RELEVANT_FILES=false
+for file in $STAGED_FILES; do
+  case "$file" in
+    app/* | config/* | database/* | routes/* | lang/* | tests/*)
+      RELEVANT_FILES=true
+      break
+      ;;
+  esac
+done
+
+if [ "$RELEVANT_FILES" = true ]; then
+  echo '\033[1;32mArchivos relevantes detectados, ejecutando análisis de código...\033[0m \n'
+
+  echo '\033[1;35mAplicar formato y estilos con Laravel Pint\033[0m'
+  vendor/bin/sail pint --dirty -n -v --ansi
+  if [ $? -ne 0 ]; then exit 1; fi
+
+  STAGED_PHP_FILES=$(git diff --cached --name-only --diff-filter=ACMR | grep "\.php$")
+
+  echo '\n\n\033[1;36mAnálisis estático con Larastan solo en archivos staged\033[0m \n'
+  if [ -n "$STAGED_PHP_FILES" ]; then
+    vendor/bin/sail php vendor/bin/phpstan analyse --memory-limit=1G $STAGED_PHP_FILES -n -v --ansi
+    if [ $? -ne 0 ]; then exit 1; fi
+  else
+    echo "No hay archivos PHP en staging para analizar con Larastan"
+  fi
+
+else
+  echo '\033[1;35mNo se detectaron archivos relevantes para análisis.\033[0m'
+fi
+
+echo '\n\033[0;34mEjecutar pruebas unitarias \033[0m\n'
+  vendor/bin/sail artisan test --colors=always
+  if [ $? -ne 0 ]; then exit 1; fi
+
+exit 0
