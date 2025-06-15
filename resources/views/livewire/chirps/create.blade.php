@@ -1,8 +1,17 @@
 <?php
+use Livewire\Attributes\Validate;
 use Livewire\Volt\Component;
 new class extends Component
 {
+    #[Validate('required|string|max:255')]
     public string $message = '';
+
+    public function store(): void
+    {
+        $validated = $this->validate();
+        auth()->user()->chirps()->create($validated);
+        $this->message = '';
+    }
 }; ?>
 <div>
     <form wire:submit="store">
@@ -13,5 +22,5 @@ new class extends Component
         ></textarea>
         <x-input-error :messages="$errors->get('message')" class="mt-2" />
         <x-primary-button class="mt-4">{{ __('Chirp') }}</x-primary-button>
-    </form> <!-- [tl! add:end] -->
+    </form>
 </div>
