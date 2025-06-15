@@ -12,7 +12,7 @@ class Logout
      */
     public function __invoke(): void
     {
-        Auth::guard('web')->logout();
+        Auth::guard('web')->logout(); // @phpstan-ignore-line
 
         Session::invalidate();
         Session::regenerateToken();
