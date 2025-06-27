@@ -126,7 +126,7 @@ vendor/bin/sail logs -f
 - ✅ **Interfaz moderna** con Tailwind CSS
 - ✅ **Componentes reactivos** con Livewire/Volt
 
-## Estructura del Proyecto
+## Herramientas
 
 - **Backend**: Laravel 12 con PHP 8.4
 - **Frontend**: Livewire + Volt + Tailwind CSS
